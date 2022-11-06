@@ -1,7 +1,7 @@
 import cv2
 
 from helper import plotMatches
-from matchPics import matchPics
+from ec_matchPics import matchPics
 from opts import get_opts
 from scipy import ndimage
 
@@ -17,8 +17,10 @@ def displayMatched(opts, image1, image2):
     """
     # i = 10
     # for i in range(4):
-    # I2 = ndimage.rotate(image2, 10 * i, reshape=False)
-    matches, locs1, locs2 = matchPics(image1, image2, opts)
+    image2 = ndimage.rotate(image1, 30, reshape=True)
+    matches, locs1, locs2, deg = matchPics(image1, image2, opts)
+
+    image1 = ndimage.rotate(image1, deg, reshape=True)
 
     # display matched features
     plotMatches(image1, image2, matches, locs1, locs2)

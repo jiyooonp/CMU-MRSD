@@ -6,7 +6,9 @@ import numpy as np
 
 from opts import get_opts
 # Import necessary functions
-from planarH import computeH_ransac, compositeH
+from planarH import computeH_ransac, compositeH_full
+from displayMatch import displayMatched
+from helper import plotMatches
 
 # Q4
 path1 = '../data/left.jpg'
@@ -95,7 +97,9 @@ loc1_, loc2_ = np.array(locs1), np.array(locs2)
 
 bestH2to1, inliers = computeH_ransac(loc1_, loc2_, opts)
 
-composite_img = compositeH(bestH2to1, I1, I2)
+plotMatches(I1, I2, np.array([[i, i] for i in range(len(loc1_))]), loc1_, loc2_)
+
+composite_img = compositeH_full(bestH2to1, I1, I2)
 composite_img = composite_img[:, :, [2, 1, 0]]
 
 plt.imshow(composite_img)

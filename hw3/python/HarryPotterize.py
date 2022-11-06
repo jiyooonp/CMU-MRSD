@@ -32,15 +32,15 @@ def warpImage(opts):
     plt.imshow(composite_img)
     s = str(opts.max_iters) + "," + str(opts.inlier_tol) + "," + str(np.sum(inliers))
     plt.title(s)
-    # plt.show()
-    plt.savefig(s + ".png")
+    plt.show()
+    # plt.savefig(s + ".png")
 
 
 if __name__ == "__main__":
     opts = get_opts()
-    for m in [300, 500, 1000]:
-        for i in [20, 2, 0.5]:
-            opts.max_iters = m
-            opts.inlier_tol = i
-            warpImage(opts)
-    # warpImage(opts)
+    # for m in [300, 500, 1000]:
+    #     for i in [20, 2, 0.5]:
+    #         opts.max_iters = m
+    #         opts.inlier_tol = i
+    #         warpImage(opts)
+    warpImage(opts)

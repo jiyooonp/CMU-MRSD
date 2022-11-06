@@ -2,23 +2,24 @@ import math
 import random as rd
 
 import cv2
-import matplotlib.pyplot as plt
 import numpy as np
 
 
 def match_maker(match, loc1, loc2):
     N = match.shape[0]
+    # if N > 10:
+    #     N = 10
     loc1_, loc2_ = np.zeros((N, 2)), np.zeros((N, 2))
     x1, x2 = [], []
     for i in range(N):
-        # loc1_[i, :] = loc1[match[i, 0], :]
-        # loc2_[i, :] = loc2[match[i, 1], :]
-        m1 = loc1[match[i, 0], :]
-        m2 = loc2[match[i, 1], :]
-        x1.append(m1)
-        x2.append(m2)
-    x1 = np.vstack(x1)
-    x2 = np.vstack(x2)
+        loc1_[i, :] = loc1[match[i, 0], :]
+        loc2_[i, :] = loc2[match[i, 1], :]
+        # m1 = loc1[match[i, 0], :]
+        # m2 = loc2[match[i, 1], :]
+        # x1.append(m1)
+        # x2.append(m2)
+    # x1 = np.vstack(x1)
+    # x2 = np.vstack(x2)
 
     return x1, x2
 
@@ -27,13 +28,21 @@ def computeH(x1, x2):
     # Q2.2.1
     N = x1.shape[0]
     # Compute the homography between two sets of points
+    # A = np.zeros((2 * N, 9))
+    # for i in range(N):
+    #     A[i:i + 2, :] = np.array(
+    #         [[x2[i, 0], x2[i, 1], 1, 0, 0, 0, -x1[i, 0] * x2[i, 0], -x1[i, 0] * x2[i, 1], -x1[i, 0]],
+    #          [0, 0, 0, x2[i, 0], x2[i, 1], 1, -x1[i, 1] * x2[i, 0], -x1[i, 1] * x2[i, 1], -x1[i, 1]]])
+    # A = [[[x2[i, 0], x2[i, 1], 1, 0, 0, 0, -x1[i, 0] * x2[i, 0], -x1[i, 0] * x2[i, 1], -x1[i, 0]],
+    #       [0, 0, 0, x2[i, 0], x2[i, 1], 1, -x1[i, 1] * x2[i, 0], -x1[i, 1] * x2[i, 1], -x1[i, 1]]]
+    #      for i in range(N)]
     A = [[[-x2[i, 0], -x2[i, 1], -1, 0, 0, 0, x1[i, 0] * x2[i, 0], x1[i, 0] * x2[i, 1], x1[i, 0]],
           [0, 0, 0, -x2[i, 0], -x2[i, 1], -1, x1[i, 1] * x2[i, 0], x1[i, 1] * x2[i, 1], x1[i, 1]]]
          for i in range(N)
          ]
     A = np.array(A).reshape(2 * N, -1)
     u, s, vh = np.linalg.svd(A)
-    H2to1 = vh[-1, :].reshape(3, 3)
+    H2to1 = vh[-1, :].reshape(3, 3) / vh[-1, -1]
 
     return H2to1
 
@@ -86,7 +95,7 @@ def computeH_ransac(locs1, locs2, opts):
 
     max_iters = opts.max_iters  # the number of iterations to run RANSAC for
     inlier_tol = opts.inlier_tol  # the tolerance value for considering a point to be an inlier
-    # print(locs1.shape)
+
     locsf1 = np.fliplr(locs1)
     locsf2 = np.fliplr(locs2)
 
@@ -144,38 +153,4 @@ def compositeH(H2to1, template, img):
     # Use mask to combine the warped template and the image
     composite_img = img
     composite_img[np.where(warped_mask == 1)] = warped_img[np.where(warped_mask == 1)]
-    return composite_img
-
-
-def compositeH_full(H2to1, template, img):
-    # no crop result for panorama
-
-    # Create a composite image after warping the template image on top
-    # of the image using the homography
-
-    # Note that the homography we compute is from the image to the template;
-    # x_template = H2to1*x_photo
-    # For warping the template to the image, we need to invert it.
-
-    # Create mask of same size as template
-    # Warp mask by appropriate homography
-    rows, cols, ch = template.shape
-    print(template.shape)
-    points = np.array([[0, 0, 1], [0, rows - 1, 1], [cols - 1, 0, 1], [cols - 1, rows - 1, 1]])
-    points_t = np.dot(H2to1, points.T)
-    points_t /= points_t[2:, ]
-
-    min_r, min_h = int(np.round(np.min(points_t[0, :]))), int(np.round(np.min(points_t[1, :])))
-
-    M = np.float32([[1, 0, max(-min_r, 0)], [0, 1, max(-min_h, 0)], [0, 0, 1]])
-
-    width = max(-min_r, 0) + int(np.round(np.max(points_t[0, :])))
-    height = max(-min_h, 0) + int(np.round(np.max(points_t[1, :])))
-
-    wtemp = cv2.warpPerspective(template, M, (width, height))
-    wimg = cv2.warpPerspective(img, np.matmul(M, H2to1), (width, height))
-
-    composite_img = np.zeros(wtemp.shape)
-    composite_img[np.where(wtemp != 0)] = wtemp[np.where(wtemp != 0)] / 255
-    composite_img[np.where(wimg != 0)] = wimg[np.where(wimg != 0)] / 255
     return composite_img

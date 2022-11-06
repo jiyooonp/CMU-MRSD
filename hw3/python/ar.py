@@ -37,38 +37,32 @@ N = min(ar_source.shape[0], book.shape[0])
 
 cap = cropped_scaled
 count = 0
-missing = [79, 395, 435, 436, 437, 438]
 composite_img_list = []
 while count < N:
-    if count in missing:
-        print(count)
 
-        frame = cap[count]
+    frame = cap[count]
 
-        matches, locs1, locs2 = matchPics(book_cover, book[count], opts)
+    matches, locs1, locs2 = matchPics(book_cover, book[count], opts)
 
-        plotMatches(book_cover, book[count], matches, locs1, locs2)
-        loc1_, loc2_ = match_maker(matches, locs1, locs2)
-        # if len(loc1_) < 4:
-        #     count = count + 1
-        #     continue
-        bestH2to1, inliers = computeH_ransac(loc1_, loc2_, opts)
+    plotMatches(book_cover, book[count], matches, locs1, locs2)
+    loc1_, loc2_ = match_maker(matches, locs1, locs2)
+    # if len(loc1_) < 4:
+    #     count = count + 1
+    #     continue
+    bestH2to1, inliers = computeH_ransac(loc1_, loc2_, opts)
 
-        composite_img = compositeH(bestH2to1, cropped_scaled[count], book[count])
-        print(composite_img.shape, cropped_scaled[count].shape, book[count].shape)
-        composite_img = composite_img[:, :, [2, 1, 0]]
-        cv2.imshow('plz work', composite_img)
-        cv2.imwrite("frame%d.jpg" % count, composite_img)
-        composite_img_list.append(composite_img)
+    composite_img = compositeH(bestH2to1, cropped_scaled[count], book[count])
+    print(composite_img.shape, cropped_scaled[count].shape, book[count].shape)
+    composite_img = composite_img[:, :, [2, 1, 0]]
+    cv2.imshow('plz work', composite_img)
+    cv2.imwrite("frame%d.jpg" % count, composite_img)
+    composite_img_list.append(composite_img)
 
-        im = Image.fromarray(composite_img)
-        im.save("../result/vid5/" + str(count) + ".jpg")
-        count = count + 1
+    im = Image.fromarray(composite_img)
+    im.save("../result/vid5/" + str(count) + ".jpg")
+    count = count + 1
 
-        if cv2.waitKey(10) & 0xFF == ord('q'):
-            break
-    else:
-        count = count + 1
-        continue
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+        break
 
 cv2.destroyAllWindows()  # destroy all opened windows
