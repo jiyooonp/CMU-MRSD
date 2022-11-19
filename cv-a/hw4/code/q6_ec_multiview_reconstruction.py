@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 
 from helper import visualize_keypoints, plot_3d_keypoint, connections_3d, colors, plot_3d_keypoint1
-from q3_2_triangulate import triangulate
+from q3_2_triangulate import triangulate, triangulate3D
 from q2_1_eightpoint import eightpoint
 from q4_2_visualize import compute3D_pts
 from q3_2_triangulate import findM2
@@ -28,37 +28,27 @@ Q6.1 Multi-View Reconstruction of keypoints.
 def MultiviewReconstruction(K1, pts1, K2, pts2, K3, pts3, imgs, Thres=100):
     # Replace pass by your implementation
 
-    [im1, im2, im3] = imgs
+    thresh = Thres
+    err = 0
 
-    intrinsics12 = {'K1': K1, 'K2': K2}
-    intrinsics13 = {'K1': K1, 'K2': K3}
-    intrinsics23 = {'K1': K2, 'K2': K3}
-
-    F12 = eightpoint(pts1[:, :2], pts2[:, :2], M=np.max([*im1.shape, *im2.shape]))
-    F13 = eightpoint(pts1[:, :2], pts3[:, :2], M=np.max([*im1.shape, *im3.shape]))
-    F23 = eightpoint(pts2[:, :2], pts3[:, :2], M=np.max([*im2.shape, *im3.shape]))
-
-    M2, C2, P12 = findM2(F12, pts1[:, :2], pts2[:, :2], intrinsics12, filename='q3_3.npz')
-    M2, C2, P13 = findM2(F13, pts1[:, :2], pts3[:, :2], intrinsics13, filename='q3_3.npz')
-    M2, C2, P23 = findM2(F23, pts2[:, :2], pts3[:, :2], intrinsics23, filename='q3_3.npz')
-
-    c12 = pts1[:, 2] + pts2[:, 2]
-    c13 = pts1[:, 2] + pts3[:, 2]
-    c23 = pts2[:, 2] + pts3[:, 2]
-
-    realP = np.zeros(P12.shape)
-
-    for i in range(P12.shape[0]):
-        mini = max(c12[i], c13[i], c23[i])
-        if c12[i] == mini:
-            realP[i, :] = P12[i, :]
-        elif c13[i] == mini:
-            realP[i, :] = P13[i, :]
+    realP = np.zeros((N, 3))
+    for i in range(N):
+        print("::", pts1[i, 2], pts2[i, 2], pts3[i, 2])
+        if pts1[i, 2] > thresh and pts2[i, 2] > thresh and pts3[i, 2] > thresh:
+            X, error = triangulate3D(C1, pts1[i, :2].reshape(1, 2), C2, pts2[i, :2].reshape(1, 2), C3,
+                                     pts3[i, :2].reshape(1, 2))
+        elif pts1[i, 2] > thresh and pts2[i, 2] > thresh:
+            X, error = triangulate(C1, pts1[i, :2].reshape(1, 2), C2, pts2[i, :2].reshape(1, 2))
+        elif pts1[i, 2] > thresh and pts3[i, 2] > thresh:
+            X, error = triangulate(C1, pts1[i, :2].reshape(1, 2), C3, pts3[i, :2].reshape(1, 2))
+        elif pts2[i, 2] > thresh and pts3[i, 2] > thresh:
+            X, error = triangulate(C2, pts2[i, :2].reshape(1, 2), C3, pts3[i, :2].reshape(1, 2))
         else:
-            realP[i, :] = P23[i, :]
-    plot_3d_keypoint1(P12, P13, P23, realP)
-
-    return realP
+            print("not working!!!")
+        realP[i, :] = X
+        err += error
+    np.savez('results/q6_1.npz', P=realP)
+    return realP, err
 
 
 '''
@@ -66,17 +56,40 @@ Q6.2 Plot Spatio-temporal (3D) keypoints
     :param car_points: np.array points * 3
 '''
 
+connections_3d = [[0, 1], [1, 3], [2, 3], [2, 0], [4, 5], [6, 7], [8, 9], [9, 11], [10, 11], [10, 8], [0, 4], [4, 8],
+                  [1, 5], [5, 9], [2, 6], [6, 10], [3, 7], [7, 11]]
+color_links = [(255, 0, 0), (255, 0, 0), (255, 0, 0), (255, 0, 0), (0, 0, 255), (255, 0, 255), (0, 255, 0), (0, 255, 0),
+               (0, 255, 0), (0, 255, 0), (0, 0, 255), (0, 0, 255), (0, 0, 255), (0, 0, 255), (255, 0, 255),
+               (255, 0, 255), (255, 0, 255), (255, 0, 255)]
+colors = ['blue', 'blue', 'blue', 'blue', 'red', 'magenta', 'green', 'green', 'green', 'green', 'red', 'red', 'red',
+          'red', 'magenta', 'magenta', 'magenta', 'magenta']
+
 
 def plot_3d_keypoint_video(pts_3d_video):
     # Replace pass by your implementation
-    pass
+    fig = plt.figure()
+    num_points = len(pts_3d_video)
+    ax = fig.add_subplot(111, projection='3d')
+    for i in range(num_points):
+        pts_3d = pts_3d_video[i]
+        for j in range(len(connections_3d)):
+            index0, index1 = connections_3d[j]
+            xline = [pts_3d[index0, 0], pts_3d[index1, 0]]
+            yline = [pts_3d[index0, 1], pts_3d[index1, 1]]
+            zline = [pts_3d[index0, 2], pts_3d[index1, 2]]
+            ax.plot(xline, yline, zline, color=colors[j])
+    np.set_printoptions(threshold=1e6, suppress=True)
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    plt.show()
 
 
 # Extra Credit
 if __name__ == "__main__":
 
     pts_3d_video = []
-    for loop in range(10):
+    for loop in range(1):
         print(f"processing time frame - {loop}")
 
         data_path = os.path.join('data/q6/', 'time' + str(loop) + '.npz')
@@ -103,8 +116,8 @@ if __name__ == "__main__":
         M2 = data['M2']
         M3 = data['M3']
 
-        print("pts1")
-        print(pts1)
+        # print("pts1")
+        # print(pts1)
 
         # Note - Press 'Escape' key to exit img preview and loop further
         # img1 = visualize_keypoints(im1, pts1)
@@ -117,7 +130,11 @@ if __name__ == "__main__":
         C2 = K2.dot(M2)
         C3 = K3.dot(M3)
 
-        # K1, K2 = intrinsics['K1'], intrinsics['K2']
+        N = pts1.shape[0]
 
-        P = MultiviewReconstruction(K1, pts1, K2, pts2, K3, pts3, imgs, Thres=100)
-        # plot_3d_keypoint(P)
+        P, err = MultiviewReconstruction(K1, pts1, K2, pts2, K3, pts3, imgs, Thres=300)
+        print("error:", err)
+
+        plot_3d_keypoint(P)
+        pts_3d_video.append(P)
+    # plot_3d_keypoint_video(pts_3d_video)

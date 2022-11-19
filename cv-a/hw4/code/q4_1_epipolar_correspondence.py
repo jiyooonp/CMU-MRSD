@@ -109,78 +109,37 @@ def epipolarCorrespondence(im1, im2, F, x1, y1):
     for (zx, zy) in zs:
         if y1 - search < zx < y1 + search:
             fzs.append([zx, zy])
-    # fzs= np.array(fzs)
-    # ax2.plot(fzs[:, 1], fzs[:, 0], 'r:')
+
     img_g1 = ndimage.gaussian_filter(im1, sigma=2)
     img_g2 = ndimage.gaussian_filter(im2, sigma=2)
 
-    d1 = getDensity(img_g1, x1, y1, w_size)
+    d1 = img_g1[y1 - w_size: y1 + w_size, x1 - w_size: x1 + w_size]
 
     min_d = 1000
     [x2, y2] = [0, 0]
 
     for (y, x) in fzs:
-        d2 = getDensity(img_g2, x, y, w_size)
-        if abs(d1 - d2) < min_d:
-            min_d = abs(d1 - d2)
+        if not possible(img_g2, w_size, x, y):
+            continue
+        d2 = img_g2[y - w_size: y + w_size, x - w_size: x + w_size]
+        d = np.sqrt(np.sum((d1 - d2) ** 2))
+        if d < min_d:
+            min_d = d
             [x2, y2] = [x, y]
 
     return x2, y2
 
 
-def getDensity(img, a, b, w):
-    img_g = img
+def possible(img, w_size, x, y):
+    xx = img.shape[1]
+    yy = img.shape[0]
 
-    d = 0
-
-    start_x = a - w
-    end_x = a + w
-    start_y = b - w
-    end_y = b + w
-
-    if start_x < 0:
-        start_x = 0
-    if end_x > img_g.shape[0] - 1:
-        end_x = img_g.shape[0] - 1
-    if start_y < 0:
-        start_y = 0
-    if end_y > img_g.shape[1] - 1:
-        end_y = img_g.shape[1] - 1
-
-    # for i in range(start_x, end_x):
-    #     for j in range(start_y, end_y):
-    #         d+=np.sum(img_g[i, j, :])
-    # fig = plt.figure("df")
-    # plt.imshow(img_g[start_x: end_x,start_y: end_y, :])
-    # plt.show()
-    # print(img_g[start_x: end_x,start_y: end_y, :])
-    d = np.sum(img_g[start_y: end_y, start_x: end_x, :])
-    return d
-
-
-def getDensity1(img, a, b, w):
-    # locs = [x0, x1, y0, y1]
-    # print('img', img.shape)
-    d = 0
-    # print('dsadsadsa',type(a), type(b), type(w))
-    # print("range:", a-w, a+w, b-w, b+w)
-    start_x = a - w
-    end_x = a + w
-    start_y = b - w
-    end_y = b + w
-    if start_x < 0:
-        start_x = 0
-    if end_x > img.shape[0] - 1:
-        end_x = img.shape[0] - 1
-    if start_y < 0:
-        start_y = 0
-    if end_y > img.shape[1] - 1:
-        end_y = img.shape[1] - 1
-
-    for i in range(start_x, end_x):
-        for j in range(start_y, end_y):
-            d += np.sum(img[i, j, :])
-    return d
+    if not (0 <= x - w_size <= xx) or not (0 <= x + w_size <= xx):
+        return False
+    if not (0 <= y - w_size <= yy) or not (0 <= y + w_size <= yy):
+        return False
+    else:
+        return True
 
 
 if __name__ == "__main__":
@@ -195,11 +154,11 @@ if __name__ == "__main__":
     # YOUR CODE HERE
     F = eightpoint(pts1, pts2, M=np.max([*im1.shape, *im2.shape]))
 
-    epipolarMatchGUI(im1, im2, F)
+    # epipolarMatchGUI(im1, im2, F)
 
     # Simple Tests to verify your implementation:
     x2, y2 = epipolarCorrespondence(im1, im2, F, 119, 217)
-    assert (np.linalg.norm(np.array([x2, y2]) - np.array([118, 181])) < 10)
+    # assert (np.linalg.norm(np.array([x2, y2]) - np.array([118, 181])) < 10)
 
     # save
     filename = "q4_1.npz"

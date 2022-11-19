@@ -31,6 +31,9 @@ Q4.2: Finding the 3D position of given points based on epipolar correspondence a
 def compute3D_pts(temple_pts1, intrinsics, F, im1, im2):
     # ----- TODO -----
     # YOUR CODE HERE
+    K1, K2 = intrinsics['K1'], intrinsics['K2']
+    M1 = np.hstack((np.identity(3), np.zeros(3)[:, np.newaxis]))
+    C1 = K1.dot(M1)
 
     fig = plt.figure()
     ax = plt.axes(projection='3d')
@@ -44,6 +47,11 @@ def compute3D_pts(temple_pts1, intrinsics, F, im1, im2):
     pts2 = np.array(pts2)
 
     M2, C2, P = findM2(F, temple_pts1, pts2, intrinsics, filename='q3_3.npz')
+    
+    C2 = K2.dot(M2)
+
+    filename = "q4_2.npz"
+    np.savez('results/' + filename, F=F, M1=M1, M2=M2, C1=C1, C2=C2)
 
     ax.scatter3D(P[:, 0], P[:, 1], P[:, 2])
 
@@ -87,3 +95,7 @@ if __name__ == "__main__":
 
     F = eightpoint(pts1, pts2, M=np.max([*im1.shape, *im2.shape]))
     compute3D_pts(temple_pts1, intrinsics, F, im1, im2)
+
+    # save
+
+    print(F)

@@ -18,13 +18,10 @@ Q3.1: Compute the essential matrix E.
 
 def essentialMatrix(F, K1, K2):
     # Replace pass by your implementation
-    print(K1, K2)
     E = K2.T @ F @ K1
-    print('before', E)
-    # E = E / E[:, -1]
-    # print('after', E)
+    E = E / E[-1, -1]
     # save
-    # np.savez('results/q3_1.npz', F=F, E=E)
+    np.savez('results/q3_1.npz', F=F, E=E)
     return E
 
 

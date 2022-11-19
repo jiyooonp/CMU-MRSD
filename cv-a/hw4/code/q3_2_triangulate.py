@@ -31,7 +31,6 @@ Q3.2: Triangulate a set of 2D coordinates in the image to a set of 3D points.
 def triangulate(C1, pts1, C2, pts2):
     # Replace pass by your implementation
 
-    # (1)
     N = pts1.shape[0]
 
     X = np.zeros((N, 3))
@@ -66,9 +65,56 @@ def triangulate(C1, pts1, C2, pts2):
         # print(e1, e2)
         error += (e1 + e2)
 
-    err = np.sum((pts1[:, 0] - Proj1_n_list[:, 0]) ** 2 + (pts1[:, 1] - Proj1_n_list[:, 1]) ** 2 + (
-            pts2[:, 0] - Proj2_n_list[:, 0]) ** 2 + (pts2[:, 1] - Proj2_n_list[:, 1]) ** 2)
-    print(error, err)
+    # err = np.sum((pts1[:, 0] - Proj1_n_list[:, 0]) ** 2 + (pts1[:, 1] - Proj1_n_list[:, 1]) ** 2 + (
+    #         pts2[:, 0] - Proj2_n_list[:, 0]) ** 2 + (pts2[:, 1] - Proj2_n_list[:, 1]) ** 2)
+    # print(error, err)
+    return X, error
+
+
+def triangulate3D(C1, pts1, C2, pts2, C3, pts3):
+    # (1)
+    N = pts1.shape[0]
+
+    X = np.zeros((N, 3))
+    error = 0
+
+    Proj1_n_list = np.zeros((N, 2))
+    Proj2_n_list = np.zeros((N, 2))
+    Proj3_n_list = np.zeros((N, 2))
+
+    for i in range(N):
+        A = np.array([
+            pts1[i, 1] * C1[2, :] - C1[1, :],
+            C1[0, :] - pts1[i, 0] * C1[2, :],
+            pts2[i, 1] * C2[2, :] - C2[1, :],
+            C2[0, :] - pts2[i, 0] * C2[2, :],
+            pts3[i, 1] * C3[2, :] - C3[1, :],
+            C3[0, :] - pts3[i, 0] * C3[2, :]
+        ])
+        u, s, vh = np.linalg.svd(A)
+        P = vh[-1, :].reshape(4, -1)
+        P /= P[-1, :]
+        P = P.reshape(4)
+        X[i, :] = P[:3]
+
+        pt3D = P
+        Proj1 = C1 @ pt3D.T  # 3xN
+        Proj1_n = (Proj1 / Proj1[2])[:2]  # 2xN
+        Proj1_n_list[i, :] = Proj1_n
+
+        Proj2 = C2 @ pt3D.T  # 3xN
+        Proj2_n = (Proj2 / Proj2[2])[:2]  # 2xN
+        Proj2_n_list[i, :] = Proj2_n
+
+        Proj3 = C3 @ pt3D.T  # 3xN
+        Proj3_n = (Proj3 / Proj3[2])[:2]  # 2xN
+        Proj3_n_list[i, :] = Proj3_n
+
+        e1 = (np.linalg.norm(Proj1_n - pts1[i, :])) ** 2
+        e2 = (np.linalg.norm(Proj2_n - pts2[i, :])) ** 2
+        e3 = (np.linalg.norm(Proj3_n - pts3[i, :])) ** 2
+        error += (e1 + e2 + e3)
+
     return X, error
 
 
@@ -116,14 +162,12 @@ def findM2(F, pts1, pts2, intrinsics, filename='q3_3.npz'):
         P, err = triangulate(C1, pts1, C2, pts2)
 
         if np.min(P[:, -2]) > min_p or np.min(P[:, -2]) > 0:
-            print("in here")
             min_p = np.min(P[:, -2])
             M2 = m
             Pf = P
             C2f = C2
-
     # save
-    # np.savez('results/' + filename, M2=M2, C2=C2, P=Pf)
+    np.savez('results/' + filename, M2=M2, C2=C2f, P=Pf)
 
     return M2, C2f, Pf
 
@@ -139,6 +183,7 @@ if __name__ == "__main__":
     F = eightpoint(pts1, pts2, M=np.max([*im1.shape, *im2.shape]))
 
     M2, C2, P = findM2(F, pts1, pts2, intrinsics)
+    print("M2:", M2)
 
     # Simple Tests to verify your implementation:
     M1 = np.hstack((np.identity(3), np.zeros(3)[:, np.newaxis]))

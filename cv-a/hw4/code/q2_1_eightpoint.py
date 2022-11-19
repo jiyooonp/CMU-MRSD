@@ -25,9 +25,6 @@ Q2.1: Eight Point Algorithm
 
 
 def eightpoint(pts1, pts2, M):
-    # pts1, pts2 = pts2, pts1
-
-    # (1)
     N = pts1.shape[0]
 
     T = np.diag([1 / M, 1 / M, 1])
@@ -35,34 +32,26 @@ def eightpoint(pts1, pts2, M):
     npts1 = pts1 / M
     npts2 = pts2 / M
 
-    # (2)
     x1 = npts1
     x2 = npts2
 
     A = [
-        [x1[i, 0] * x2[i, 0], x1[i, 0] * x2[i, 1], x1[i, 0], x1[i, 1] * x2[i, 0], x1[i, 1] * x2[i, 1], x1[i, 1],
-         x2[i, 0], x2[i, 1], 1]
+        [x2[i, 0] * x1[i, 0], x2[i, 0] * x1[i, 1], x2[i, 0], x2[i, 1] * x1[i, 0], x2[i, 1] * x1[i, 1], x2[i, 1],
+         x1[i, 0], x1[i, 1], 1]
         for i in range(N)
     ]
+
     A = np.array(A).reshape(N, -1)
     u, s, vh = np.linalg.svd(A)
     F = vh[-1, :].reshape(3, 3)
 
-    # (3)
     F = _singularize(F)
-
-    # (4)
     F = refineF(F, npts1, npts2)
 
-    # (5)
     F = T.T @ F @ T
+    F = F / F[-1, -1]
 
-    # save
-    # np.savez('results/q2_1.npz', F=F, M=M)
-    print(F)
-    pts1_h = np.hstack((pts1, np.ones((N, 1))))
-    pts2_h = np.hstack((pts2, np.ones((N, 1))))
-    print(pts2_h @ F @ pts1_h.T)
+    np.savez('results/q2_1.npz', F=F, M=M)
 
     return F
 
@@ -77,7 +66,7 @@ if __name__ == "__main__":
 
     F = eightpoint(pts1, pts2, M=np.max([*im1.shape, *im2.shape]))
     # [:10, :]
-
+    print(F)
     # Q2.1
     displayEpipolarF(im1, im2, F)
 
