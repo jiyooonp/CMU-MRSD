@@ -30,7 +30,7 @@ Implementation of a scence classification system that uses bag-of-words approach
 <!-- Results  -->
 ## Results 
 
-_For the entire report, please refer to the [Documentation](https://example.com)_
+_For the entire report, please refer to the [Documentation](https://github.com/jiyooonp/CMU-FALL-22/blob/main/cv-a/hw1/jiyoonp_hw1.pdf)_
 
 
 1. Extracting Filter Responses

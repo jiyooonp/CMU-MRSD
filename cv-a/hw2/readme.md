@@ -4,7 +4,7 @@
 <div align="center">
   <h3 align="center">Lucas-Kanade Tracking</h3>
   <p align="center">
-    16-720 Computer Vision: Homework 1 · Fall 2022
+    16-720 Computer Vision: Homework 2 · Fall 2022
   </p>
 </div>
 
@@ -23,7 +23,7 @@ Implement asimple Lucas-Kanade (LK) tracker with a single template. And implemen
 <!-- Results  -->
 ## Results 
 
-_For the entire report, please refer to the [Documentation](https://example.com)_
+_For the entire report, please refer to the [Documentation](https://github.com/jiyooonp/CMU-FALL-22/blob/main/cv-a/hw2/jiyoonp_hw2.pdf)_
 
 
 1. Lucas-Kanade Tracking with One Single Template
