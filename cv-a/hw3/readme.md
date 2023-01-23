@@ -8,7 +8,7 @@
   </p>
 </div>
 
-![image](./img/hw3_main.png)
+![image](./imgr/hw3_main.png)
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
@@ -28,14 +28,14 @@ _For the entire report, please refer to the [Documentation](https://example.com)
 
 
 1. Feature Detection and Matching
-![image](./img/hw3_2.png)
+![image](./imgr/hw3_2.png)
 2. RANSAC for Homography Computation
-![image](./img/hw3_3.png)
+![image](./imgr/hw3_3.png)
 3. Augmented Reality application
-![image](./img/hw3_6.gif)
+![image](./imgr/hw3_6.gif)
 4. Panorama Image Generation Using Homography 
-![image](./img/hw3_4.png)
-![image](./img/hw3_5.png)
+![image](./imgr/hw3_4.png)
+![image](./imgr/hw3_5.png)
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
