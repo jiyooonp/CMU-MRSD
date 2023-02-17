@@ -1,0 +1,78 @@
+Mon Feb 13 16:55:06 2023
+ERROR: could not create window
+
+Mon Feb 13 16:58:31 2023
+ERROR: could not create window
+
+Mon Feb 13 17:06:51 2023
+ERROR: could not create window
+
+Mon Feb 13 17:08:42 2023
+ERROR: could not create window
+
+Mon Feb 13 17:09:48 2023
+ERROR: could not create window
+
+Mon Feb 13 17:24:37 2023
+ERROR: could not create window
+
+Mon Feb 13 17:26:48 2023
+ERROR: could not create window
+
+Mon Feb 13 17:34:29 2023
+ERROR: could not create window
+
+Mon Feb 13 18:07:46 2023
+ERROR: could not create window
+
+Mon Feb 13 18:14:21 2023
+ERROR: could not create window
+
+Mon Feb 13 19:34:20 2023
+ERROR: could not create window
+
+Mon Feb 13 19:41:24 2023
+ERROR: could not create window
+
+Mon Feb 13 19:42:36 2023
+ERROR: could not create window
+
+Mon Feb 13 19:44:36 2023
+ERROR: could not create window
+
+Mon Feb 13 19:45:06 2023
+ERROR: could not create window
+
+Mon Feb 13 19:45:22 2023
+ERROR: could not create window
+
+Mon Feb 13 19:52:18 2023
+ERROR: could not create window
+
+Mon Feb 13 19:52:49 2023
+ERROR: could not create window
+
+Mon Feb 13 19:58:21 2023
+ERROR: could not create window
+
+Mon Feb 13 21:15:31 2023
+ERROR: Python exception raised
+
+Tue Feb 14 17:19:58 2023
+ERROR: Python exception raised
+
+Tue Feb 14 17:21:36 2023
+ERROR: Python exception raised
+
+Tue Feb 14 17:22:21 2023
+ERROR: Python exception raised
+
+Tue Feb 14 17:33:24 2023
+ERROR: Python exception raised
+
+Fri Feb 17 12:19:09 2023
+ERROR: Python exception raised
+
+Fri Feb 17 12:20:56 2023
+ERROR: Python exception raised
+
