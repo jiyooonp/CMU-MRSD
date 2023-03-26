@@ -201,3 +201,6 @@
 7. img size 
     height: 480
     width: 640
+
+8. Install hector_trajectory_server
+    sudo apt install qt4-default

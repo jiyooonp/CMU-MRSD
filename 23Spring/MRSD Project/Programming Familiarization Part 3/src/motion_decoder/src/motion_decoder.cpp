@@ -22,18 +22,17 @@ void apriltag_detection_callback(const apriltag_ros::AprilTagDetectionArray::Con
     geometry_msgs::Point point = pose.pose.position;
     geometry_msgs::Quaternion quat = pose.pose.orientation;
 
-    static tf2_ros::TransformBroadcaster br;
+    static tf::TransformBroadcaster br;
 
     geometry_msgs::TransformStamped transformStamped;
     transformStamped.header.stamp = ros::Time::now();
     transformStamped.header.frame_id = "camera";
-    transformStamped.child_frame_id = "april_tf";
+    transformStamped.child_frame_id = "april_ros";
     transformStamped.transform.translation.x = point.x;
     transformStamped.transform.translation.y = point.y;
     transformStamped.transform.translation.z = point.z;
 
     tf2::Quaternion q(quat.x, quat.y, quat.z, quat.w);
-    // transform.setRotation(q);
     transformStamped.transform.rotation.x = q.x();
     transformStamped.transform.rotation.y = q.y();
     transformStamped.transform.rotation.z = q.z();
@@ -46,9 +45,7 @@ void apriltag_detection_callback(const apriltag_ros::AprilTagDetectionArray::Con
     ic->setTagLocations(x_det, y_det, z_det);
     // ROS_INFO("%f %f\n", x_det, y_det);
   }
-  
 
-  // br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "camera", "april_tf"));
 }
 
 int main(int argc, char** argv)
