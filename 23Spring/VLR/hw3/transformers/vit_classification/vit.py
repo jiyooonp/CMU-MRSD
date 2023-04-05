@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch
 from einops_test import rearrange, reduce, repeat
 
-sys.path.append("../transformer_captioning") 
+sys.path.append("../transformer_captioning")
 from transformer import (
     AttentionLayer,
     MultiHeadAttentionLayer,
@@ -27,7 +27,7 @@ class EncoderLayer(nn.Module):
 
 class ViT(nn.Module):
     """
-        - A ViT takes an image as input, divides it into patches, and then feeds the patches through a transformer to output a sequence of patch embeddings. 
+        - A ViT takes an image as input, divides it into patches, and then feeds the patches through a transformer to output a sequence of patch embeddings.
         - To perform classification with a ViT we patchify the image, embed each patch using an embedding layer and add a learnable [CLS] token to the beginning of the sequence.
         - The output embedding corresponding to the [CLS] token is then fed through a linear layer to obtain the logits for each class.
     """
@@ -38,7 +38,7 @@ class ViT(nn.Module):
             Inputs
             - patch_dim: the dimension of each patch
             - d_model: the dimension of the input to the transformer blocks
-            - d_ff: the dimension of the intermediate layer in the feed forward block 
+            - d_ff: the dimension of the intermediate layer in the feed forward block
             - num_heads: the number of heads in the multi head attention layer
             - num_layers: the number of transformer blocks
             - num_patches: the number of patches in the image
@@ -65,7 +65,7 @@ class ViT(nn.Module):
         self.layers = nn.ModuleList([EncoderLayer(d_model, num_heads, d_ff) for _ in range(num_layers)])
 
         self.apply(self._init_weights)
-        self.device = device 
+        self.device = device
         self.to(device)
 
     def patchify(self, images):
@@ -74,25 +74,25 @@ class ViT(nn.Module):
             Inputs:
                 - images: a FloatTensor of shape (N, 3, H, W) giving a minibatch of images
             Returns:
-                - patches: a FloatTensor of shape (N, num_patches, patch_dim x patch_dim x 3) giving a minibatch of patches    
+                - patches: a FloatTensor of shape (N, num_patches, patch_dim x patch_dim x 3) giving a minibatch of patches
         """
 
         # TODO - Break images into a grid of patches
         # Feel free to use pytorch built-in functions to do this
-        N, C, H, W = images.shape
-        patches = images.unfold(2, self.patch_dim, self.patch_dim).unfold(3, self.patch_dim, self.patch_dim).reshape(N, self.num_patches, self.patch_dim * self.patch_dim * 3)
-        
+        # N, C, H, W = images.shape
+        # patches = images.unfold(2, self.patch_dim, self.patch_dim).unfold(3, self.patch_dim, self.patch_dim).reshape(N, self.num_patches, self.patch_dim * self.patch_dim * 3)
+        patches = rearrange(images, 'n c (h s1) (w s2) -> n (h w) (s1 s2 c)', s1=self.patch_dim, s2=self.patch_dim)
         return patches
 
     def forward(self, images):
         """
-            Given a batch of images, compute the logits for each class. 
+            Given a batch of images, compute the logits for each class.
             Inputs:
                 - images: a FloatTensor of shape (N, 3, H, W) giving a minibatch of images
             Returns:
                 - logits: a FloatTensor of shape (N, C) giving the logits for each class
         """
-        
+
         patches = self.patchify(images)
         patches_embedded = self.patch_embedding(patches)
         rep_cls_token = repeat(self.cls_token, '() n e -> b n e', b=images.shape[0])

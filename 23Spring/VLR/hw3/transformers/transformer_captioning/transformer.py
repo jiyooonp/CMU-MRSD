@@ -47,8 +47,9 @@ class AttentionLayer(nn.Module):
 
         # apply softmax, dropout, and use value
         y = F.softmax(dot_product, dim=-1)
-        y = torch.matmul(y, value)
         y = self.dropout(y)
+        y = torch.matmul(y, value)
+
         return y
 
 
@@ -59,7 +60,6 @@ class MultiHeadAttentionLayer(AttentionLayer):
         self.num_heads = num_heads
 
         # TODO: Initialize the following layers and parameters to perform attention
-        # self.head_proj = nn.Linear(embed_dim, embed_dim, bias=False)
         self.head_proj = nn.Linear(embed_dim, embed_dim, bias=False)
 
     def forward(self, query, key, value, attn_mask=None):
@@ -106,10 +106,11 @@ class MultiHeadAttentionLayer(AttentionLayer):
             # dot_product += additive_mask.cuda()
             attn_mask = attn_mask.cuda()
             dot_product = dot_product.masked_fill(attn_mask == 0, -1e20)
+
         # apply softmax, dropout, and use value
         y = F.softmax(dot_product, dim=-1)
-        y = torch.matmul(y, value)
         y = self.dropout(y)
+        y = torch.matmul(y, value)
 
         # concat embeddings from different heads, and project
         output = y.transpose(1, 2).contiguous().view(N, S, D)
